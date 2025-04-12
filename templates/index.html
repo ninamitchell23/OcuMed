@@ -3,35 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Segmentation</title>
+    <title>OcuMed - AMD Detection</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+    
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        input[type="file"] {
-            margin: 20px;
-        }
-        #result {
-            margin-top: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #cbe2ff, #e0eaff, #f6f8ff);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+    
+        h1 {
+            margin: 40px 0 20px;
+            color: #023e8a;
+            font-size: 2rem;
+        }
+    
+        form {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 25px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 20px;
+            animation: fadeIn 1s ease;
         }
+    
+        input[type="file"] {
+            font-size: 16px;
+            padding: 8px;
+            border: none;
+            background-color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            color: white;
+            background-color: #0077b6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        button:hover {
+            background-color: #005f8f;
+        }
+    
+        #result {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            animation: fadeIn 1.2s ease;
+        }
+    
         .image-container {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
             text-align: center;
+            animation: fadeIn 1.5s ease;
         }
+    
+        .image-container h3 {
+            margin-bottom: 10px;
+            color: #03045e;
+        }
+    
         img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            margin-top: 10px;
+            border-radius: 10px;
+        }
+    
+        @media (max-width: 600px) {
+            form {
+                width: 90%;
+            }
+    
+            .image-container {
+                width: 90%;
+            }
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
+    
 </head>
 <body>
-    <h1>Upload an Image for Segmentation</h1>
+    <h1>OcuMed: Upload OCT Scan to Detect AMD</h1>
     <form id="uploadForm" enctype="multipart/form-data">
         <input type="file" id="imageInput" accept="image/*" required>
         <button type="submit">Predict</button>
@@ -52,7 +141,7 @@
             formData.append("image", fileInput.files[0]);
             
             const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = "Processing...";
+            resultDiv.innerHTML = "<p>Processing...</p>";
             
             try {
                 const response = await fetch("/predict", {
@@ -66,14 +155,14 @@
                 } else {
                     const originalContainer = document.createElement("div");
                     originalContainer.className = "image-container";
-                    originalContainer.innerHTML = "<h3>Original OCT Scan:</h3>";
+                    originalContainer.innerHTML = "<h3>Original OCT Scan</h3>";
                     const originalImage = document.createElement("img");
                     originalImage.src = data.original_image;
                     originalContainer.appendChild(originalImage);
 
                     const maskContainer = document.createElement("div");
                     maskContainer.className = "image-container";
-                    maskContainer.innerHTML = "<h3>Predicted Mask:</h3>";
+                    maskContainer.innerHTML = "<h3>Predicted Mask</h3>";
                     const maskImage = document.createElement("img");
                     maskImage.src = data.predicted_mask;
                     maskContainer.appendChild(maskImage);
