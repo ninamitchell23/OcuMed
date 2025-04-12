@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Segmentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        input[type="file"] {
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        .image-container {
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image for Segmentation</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="imageInput" accept="image/*" required>
+        <button type="submit">Predict</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById("imageInput");
+            if (fileInput.files.length === 0) {
+                alert("Please select an image file.");
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append("image", fileInput.files[0]);
+            
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "Processing...";
+            
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                } else {
+                    const originalContainer = document.createElement("div");
+                    originalContainer.className = "image-container";
+                    originalContainer.innerHTML = "<h3>Original OCT Scan:</h3>";
+                    const originalImage = document.createElement("img");
+                    originalImage.src = data.original_image;
+                    originalContainer.appendChild(originalImage);
+
+                    const maskContainer = document.createElement("div");
+                    maskContainer.className = "image-container";
+                    maskContainer.innerHTML = "<h3>Predicted Mask:</h3>";
+                    const maskImage = document.createElement("img");
+                    maskImage.src = data.predicted_mask;
+                    maskContainer.appendChild(maskImage);
+
+                    resultDiv.innerHTML = "";
+                    resultDiv.appendChild(originalContainer);
+                    resultDiv.appendChild(maskContainer);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
